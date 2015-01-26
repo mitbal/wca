@@ -1,5 +1,5 @@
 import sys
-
+import matplotlib.pyplot as plt
 
 def read(filename):
     """ Read text file containing whatsapp chat and return the list of list of time, author, and its text
@@ -26,6 +26,15 @@ def read(filename):
             chat += [[timestamp, speaker, text]]
     return chat
 
+def get_speaker_frequency(chat):
+    frequency = {}
+    for c in chat:
+        if c[1] not in frequency.keys():
+            frequency[c[1]] = 1
+        else:
+            frequency[c[1]] += 1
+    return frequency
+
 if len(sys.argv) < 1:
     print 'The usage is: python wca.py <filename>'
 
@@ -34,3 +43,11 @@ chat = read(filename)
 
 # Number of lines
 print 'Number of lines:', len(chat)
+
+frequency = get_speaker_frequency(chat)
+labels = []
+freq = []
+for k in frequency.keys():
+    print k, frequency[k]
+    labels += [k]
+    freq += [frequency[k]]
