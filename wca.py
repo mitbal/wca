@@ -29,11 +29,29 @@ def read(filename):
 def get_speaker_frequency(chat):
     frequency = {}
     for c in chat:
+        speaker = c[1]
+        if speaker == '':
+            continue
         if c[1] not in frequency.keys():
             frequency[c[1]] = 1
         else:
             frequency[c[1]] += 1
     return frequency
+
+def plot_speaker_frequency(frequency):
+    labels = []
+    freq = []
+    for k in frequency.keys():
+        labels += [unicode(k, 'ascii', 'ignore')]
+        freq += [frequency[k]]
+    index = range(len(labels))
+    plt.xkcd()
+    fig = plt.figure()
+    plt.bar(index, freq)
+    plt.xticks([x+0.5 for x in index], labels)
+    plt.xticks(rotation=45)
+    fig.autofmt_xdate()
+    plt.show()
 
 if len(sys.argv) < 1:
     print 'The usage is: python wca.py <filename>'
@@ -44,10 +62,8 @@ chat = read(filename)
 # Number of lines
 print 'Number of lines:', len(chat)
 
+# Speaker's frequency
 frequency = get_speaker_frequency(chat)
-labels = []
-freq = []
 for k in frequency.keys():
     print k, frequency[k]
-    labels += [k]
-    freq += [frequency[k]]
+plot_speaker_frequency(frequency)
