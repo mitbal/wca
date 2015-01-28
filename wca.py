@@ -17,7 +17,7 @@ def read(filename):
                     text = lines2[1]
                 else:
                     speaker = ''
-                    text = lines2
+                    text = lines2[0]
                 timestamp = lines[0]
             else:
                 timestamp = ''
@@ -37,6 +37,24 @@ def get_speaker_frequency(chat):
         else:
             frequency[c[1]] += 1
     return frequency
+
+def get_word_frequency(chat):
+    frequency = {}
+    for c in chat:
+        text = c[2]
+        words = text.split()
+        for word in words:
+            if word not in frequency.keys():
+                frequency[word] = 1
+            else:
+                frequency[word] += 1
+
+    dictionary = []
+    for k in frequency.keys():
+        dictionary += [(k, frequency[k])]
+
+    dictionary.sort(key= lambda x: x[1], reverse=True)
+    return dictionary
 
 def plot_speaker_frequency(frequency):
     labels = []
@@ -67,3 +85,8 @@ frequency = get_speaker_frequency(chat)
 for k in frequency.keys():
     print k, frequency[k]
 plot_speaker_frequency(frequency)
+
+# Word frequency
+dictionary = get_word_frequency(chat)
+for i in xrange(50):
+    print dictionary[i][0], dictionary[i][1]
