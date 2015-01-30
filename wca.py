@@ -26,6 +26,18 @@ def read(filename):
             chat += [[timestamp, speaker, text]]
     return chat
 
+def read_stopwords(filename):
+    stopwords = []
+    with open(filename, 'r') as f:
+        f.readline()
+        f.readline()  # discard header
+        for line in f:
+            stopwords += [line.rstrip()]
+    stopwords += ['<Media']
+    stopwords += ['<media']
+    stopwords += ['omitted>']  # whatsapp special word if there is image attached in the text
+    return stopwords
+
 def get_speaker_frequency(chat):
     frequency = {}
     for c in chat:
@@ -38,12 +50,15 @@ def get_speaker_frequency(chat):
             frequency[c[1]] += 1
     return frequency
 
-def get_word_frequency(chat):
+def get_word_frequency(chat, stopwords):
     frequency = {}
     for c in chat:
         text = c[2]
         words = text.split()
         for word in words:
+            word = word.lower()
+            if word in stopwords:
+                continue
             if word not in frequency.keys():
                 frequency[word] = 1
             else:
@@ -102,7 +117,8 @@ for k in frequency.keys():
 plot_speaker_frequency(frequency)
 
 # Word frequency
-dictionary = get_word_frequency(chat)
+stopwords = read_stopwords('stopwords_id.txt')
+dictionary = get_word_frequency(chat, stopwords)
 for i in xrange(50):
     print dictionary[i][0], dictionary[i][1]
 plot_word_frequency(dictionary, 30)
