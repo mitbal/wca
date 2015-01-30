@@ -56,6 +56,21 @@ def get_word_frequency(chat):
     dictionary.sort(key= lambda x: x[1], reverse=True)
     return dictionary
 
+def plot_word_frequency(dictionary, k):
+    labels = []
+    freq = []
+    for i in xrange(k):
+        labels += [unicode(dictionary[i][0], 'ascii', 'ignore')]
+        freq += [dictionary[i][1]]
+    index = range(len(labels))
+    plt.xkcd()
+    fig = plt.figure()
+    plt.bar(index, freq)
+    plt.xticks([x+0.5 for x in index], labels)
+    plt.xticks(rotation=45)
+    fig.autofmt_xdate()
+    plt.show()
+
 def plot_speaker_frequency(frequency):
     labels = []
     freq = []
@@ -90,3 +105,4 @@ plot_speaker_frequency(frequency)
 dictionary = get_word_frequency(chat)
 for i in xrange(50):
     print dictionary[i][0], dictionary[i][1]
+plot_word_frequency(dictionary, 30)
