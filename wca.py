@@ -1,5 +1,6 @@
 import sys
 import matplotlib.pyplot as plt
+from datetime import date
 
 def read(filename):
     """ Read text file containing whatsapp chat and return the list of list of time, author, and its text
@@ -107,8 +108,42 @@ if len(sys.argv) < 1:
 filename = sys.argv[1]
 chat = read(filename)
 
+months = {
+    'Jan': 1,
+    'Feb': 2,
+    'Mar': 3,
+    'Apr': 4,
+    'May': 5,
+    'Jun': 6,
+    'Jul': 7,
+    'Aug': 8,
+    'Sep': 9,
+    'Oct': 10,
+    'Nov': 11,
+    'Dec': 12
+}
+
+
+def convert_date(txt):
+    start_date = txt.split(', ')
+    start_month = months[start_date[0].split(' ')[0]]
+    start_day = int(start_date[0].split(' ')[1])
+    if len(start_date) > 2:
+        start_year = int(start_date[1])
+    else:
+        start_year = date.today().year
+    return date(start_year, start_month, start_day)
+
+
+# Date counting
+start_date = convert_date(chat[0][0])
+end_date = convert_date(chat[-1][0])
+num_days = (end_date - start_date).days
+print 'From:', start_date, 'to', end_date, 'total:', num_days, 'days'
+
 # Number of lines
 print 'Number of lines:', len(chat)
+print 'Average per day:', len(chat) / num_days
 
 # Speaker's frequency
 frequency = get_speaker_frequency(chat)
