@@ -1,6 +1,9 @@
 import sys
 import matplotlib.pyplot as plt
 from datetime import date
+import glob
+import re
+
 
 def read(filename):
     """ Read text file containing whatsapp chat and return the list of list of time, author, and its text
@@ -27,6 +30,7 @@ def read(filename):
             chat += [[timestamp, speaker, text]]
     return chat
 
+
 def read_stopwords(filename):
     stopwords = []
     with open(filename, 'r') as f:
@@ -39,6 +43,7 @@ def read_stopwords(filename):
     stopwords += ['omitted>']  # whatsapp special word if there is image attached in the text
     return stopwords
 
+
 def get_speaker_frequency(chat):
     frequency = {}
     for c in chat:
@@ -50,6 +55,7 @@ def get_speaker_frequency(chat):
         else:
             frequency[c[1]] += 1
     return frequency
+
 
 def get_word_frequency(chat, stopwords):
     frequency = {}
@@ -72,6 +78,7 @@ def get_word_frequency(chat, stopwords):
     dictionary.sort(key= lambda x: x[1], reverse=True)
     return dictionary
 
+
 def plot_word_frequency(dictionary, k):
     labels = []
     freq = []
@@ -87,6 +94,7 @@ def plot_word_frequency(dictionary, k):
     fig.autofmt_xdate()
     plt.show()
 
+
 def plot_speaker_frequency(frequency):
     labels = []
     freq = []
@@ -101,6 +109,19 @@ def plot_speaker_frequency(frequency):
     plt.xticks(rotation=45)
     fig.autofmt_xdate()
     plt.show()
+
+
+def get_emoji_frequency(emoji_unicode, emoji_utf8, chat):
+    freq = {}
+    for codepoint in emoji_unicode:
+        freq[codepoint] = 0
+    for c in chat:
+        text = c[2]
+        for i in xrange(len(emoji_utf8)):
+            utf8 = emoji_utf8[i]
+            codepoint = emoji_unicode[i]
+            freq[codepoint] += len(re.findall(utf8, text))
+    return freq
 
 if len(sys.argv) < 1:
     print 'The usage is: python wca.py <filename>'
@@ -135,6 +156,15 @@ def convert_date(txt):
     return date(start_year, start_month, start_day)
 
 
+def convert_unicode(codepoint):
+    dec = int(codepoint, 16)
+    binary = bin(dec)[2:]
+    while len(binary) < 21:
+        binary = '0' + binary
+    utf8 = '\\'+hex(int('11110' + binary[0:3], 2))[1:] + '\\'+ hex(int('10' + binary[3:9], 2))[1:] + '\\'+ hex(int('10' + binary[9:15], 2))[1:] \
+           + '\\'+ hex(int('10' + binary[15:21], 2))[1:]
+    return utf8
+
 # Date counting
 start_date = convert_date(chat[0][0])
 end_date = convert_date(chat[-1][0])
@@ -157,3 +187,17 @@ dictionary = get_word_frequency(chat, stopwords)
 for i in xrange(50):
     print dictionary[i][0], dictionary[i][1]
 plot_word_frequency(dictionary, 30)
+
+# Load emoji
+emoji_unicode = []
+emoji_utf8 = []
+all_files = glob.glob('emoji/*.png')
+for f in all_files:
+    codepoint = f.split('\\')[1][:-4]
+    emoji_unicode += [codepoint]
+    utf8 = convert_unicode(codepoint)
+    emoji_utf8 += [utf8]
+
+frequency = get_emoji_frequency(emoji_unicode, emoji_utf8, chat)
+for k in frequency.keys():
+    print k, frequency[k]
