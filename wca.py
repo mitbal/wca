@@ -3,6 +3,10 @@ import matplotlib.pyplot as plt
 from datetime import date
 import glob
 import re
+from skimage import io
+from scipy import misc
+from PIL import Image
+import numpy as np
 
 
 def read(filename):
@@ -123,6 +127,23 @@ def get_emoji_frequency(emoji_unicode, emoji_utf8, chat):
             freq[codepoint] += len(re.findall(utf8, text))
     return freq
 
+
+def plot_emoji_frequency(frequency, n):
+
+    dictionary = []
+    for k in frequency.keys():
+        dictionary += [(k, frequency[k])]
+
+    dictionary.sort(key=lambda x: x[1], reverse=True)
+
+    plt.xkcd()
+    fig = plt.figure()
+    for i in xrange(n):
+        im = io.imread('emoji/'+ dictionary[i][0] +'.jpg')
+        fig.figimage(im, 230+i*75, 0)
+    plt.bar(range(n), [x[1] for x in dictionary[:n]])
+    plt.show()
+
 if len(sys.argv) < 1:
     print 'The usage is: python wca.py <filename>'
 
@@ -201,3 +222,5 @@ for f in all_files:
 frequency = get_emoji_frequency(emoji_unicode, emoji_utf8, chat)
 for k in frequency.keys():
     print k, frequency[k]
+
+plot_emoji_frequency(frequency, 20)
