@@ -7,6 +7,8 @@ from skimage import io
 from scipy import misc
 from PIL import Image
 import numpy as np
+import requests as req
+import re
 
 
 def read(filename):
@@ -224,3 +226,44 @@ for k in frequency.keys():
     print k, frequency[k]
 
 plot_emoji_frequency(frequency, 20)
+
+# Translate Indonesian text to English using Yandex translate API
+translated_text = ''
+index = 0
+for c in chat:
+    index += 1
+    print 'chat ke:', index
+    text = c[2]
+    text = re.sub('%', '', text)
+    r = req.get('https://translate.yandex.net/api/v1.5/tr.json/translate?key=trnsl.1.1.20150205T222339Z.64f03508b6f2088b.662c53df2c183b47f48e0436e75b106888ecd123&lang=id-en&text='+text)
+    translated_text += ' ' + r.json()['text'][0]
+
+f = open('translated.txt', 'w')
+f.write(translated_text.encode('utf8')+'\n')
+f.close()
+
+# Analyze using MonkeyLearn Generic Topic Classifier
+data = {'text': translated_text}
+response = req.post(
+    "https://api.monkeylearn.com/api/v1/categorizer/cl_5icAVzKR/classify_text/",
+    data=data,
+    headers={'Authorization': 'Token 0f584e47400267bc6118b1b4aa46c966b5b0e5df'}
+)
+
+print response.json()['result']
+topics = response.json()['result']
+
+prob = []
+labels = []
+for topic in topics:
+    prob += [topic['probability']]
+    labels += [topic['label']]
+
+index = range(len(labels))
+plt.xkcd()
+fig = plt.figure()
+plt.bar(index, prob)
+plt.xticks([x+0.5 for x in index], labels)
+plt.xticks(rotation=45)
+fig.autofmt_xdate()
+plt.show()
