@@ -2,11 +2,7 @@ import sys
 import matplotlib.pyplot as plt
 from datetime import date
 import glob
-import re
 from skimage import io
-from scipy import misc
-from PIL import Image
-import numpy as np
 import requests as req
 import re
 
@@ -38,6 +34,10 @@ def read(filename):
 
 
 def read_stopwords(filename):
+    """ Read text file filled with stopwords
+    :param filename: The text file where the stopwords reside
+    :return: list of stopwords
+    """
     stopwords = []
     with open(filename, 'r') as f:
         f.readline()
@@ -146,12 +146,6 @@ def plot_emoji_frequency(frequency, n):
     plt.bar(range(n), [x[1] for x in dictionary[:n]])
     plt.show()
 
-if len(sys.argv) < 1:
-    print 'The usage is: python wca.py <filename>'
-
-filename = sys.argv[1]
-chat = read(filename)
-
 months = {
     'Jan': 1,
     'Feb': 2,
@@ -187,6 +181,16 @@ def convert_unicode(codepoint):
     utf8 = '\\'+hex(int('11110' + binary[0:3], 2))[1:] + '\\'+ hex(int('10' + binary[3:9], 2))[1:] + '\\'+ hex(int('10' + binary[9:15], 2))[1:] \
            + '\\'+ hex(int('10' + binary[15:21], 2))[1:]
     return utf8
+
+### End of method
+
+
+### Start of main code
+if len(sys.argv) < 1:
+    print 'The usage is: python wca.py <filename>'
+
+filename = sys.argv[1]
+chat = read(filename)
 
 # Date counting
 start_date = convert_date(chat[0][0])
